@@ -9,14 +9,20 @@
  * Advantages: 
  * * time efficient as it uses bit fields to
  *   set up the value so that you only do ops on the number
- *   of bits you specify (no needs for shifts & masks in math operations.
+ *   of bits you specify (no need for shifts & masks in math operations.
  * * Space efficient as it determines the underlying type based on 
  *   the number of bits you specify (up to 64 bits).
  *
  * Limitations: 
  * * FixedPts can only have up to 64 bits (uint64_t)
  * * Each size FixedPt is a different type(FixedPt<WWID,FWID> ) this makes it
- *   difficult to define infix math ops on different sized FixedPts
+ *   difficult to define infix math ops on different sized FixedPts (could
+ *   add a common base class so operations could be defined, but that would
+ *   add overhead of virtual functions (the vptr).
+ *
+ * Compile with: C++17 required:
+ * * clang: clang++-5.0 -o fixedpt fixedpt.cpp -std=c++1z
+ * * g++: g++-7 -o fixedpt fixedpt.cpp -std=c++1z
  *
  * TODO: 
  * * Everything is unsigned right now; add signed ops/val types
