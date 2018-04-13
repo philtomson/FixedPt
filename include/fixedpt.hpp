@@ -20,9 +20,7 @@
  *   add a common base class so operations could be defined, but that would
  *   add overhead of virtual functions (the vptr).
  *
- * Compile with: C++17 required:
- * * clang: clang++-5.0 -o fixedpt fixedpt.cpp -std=c++1z
- * * g++: g++-7 -o fixedpt fixedpt.cpp -std=c++1z
+
  *
  * TODO: 
  * * Everything is unsigned right now; add signed ops/val types
@@ -176,4 +174,64 @@ struct FixedPt {
       }
 };
 
+// infix + for FixedPts of same width
+template<uint8_t WWID, uint8_t FWID> 
+auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
+{
+   return FixedPt<WWID,FWID>(a.val + b.val);
 }
+
+// infix + for FixedPts of differing widths
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
+auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+                                                                          std::max(AFWID,BFWID)>
+{
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val + b.val);
+}
+
+// infix - for FixedPts of same width
+template<uint8_t WWID, uint8_t FWID> 
+auto operator-(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
+{
+   return FixedPt<WWID,FWID>(a.val - b.val);
+}
+
+// infix + for FixedPts of differing widths
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
+auto operator-(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+                                                                          std::max(AFWID,BFWID)>
+{
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val - b.val);
+}
+
+// infix * for FixedPts of same width
+template<uint8_t WWID, uint8_t FWID> 
+auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
+{
+   return FixedPt<WWID,FWID>(a.val * b.val);
+}
+
+// infix * for FixedPts of differing widths
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
+auto operator*(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+                                                                          std::max(AFWID,BFWID)>
+{
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val * b.val);
+}
+
+// infix / for FixedPts of same width
+template<uint8_t WWID, uint8_t FWID> 
+auto operator/(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
+{
+   return FixedPt<WWID,FWID>(a.val / b.val);
+}
+
+// infix / for FixedPts of differing widths
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
+auto operator/(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+                                                                          std::max(AFWID,BFWID)>
+{
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val / b.val);
+}
+
+} //namespace FP

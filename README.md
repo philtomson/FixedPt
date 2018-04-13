@@ -44,8 +44,6 @@ of concept and a work in progress - not all operations are supported yet.
 
    * Everything is unsigned right now; add signed ops/val types.
 
-   * Define more math ops on FixedPts.
-
    * For saturation use macros to keep things efficient (could add a max_val member 
      that keeps track of the maximum value a FixedPt has seen).
 

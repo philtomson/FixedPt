@@ -15,10 +15,13 @@ int main(){
    //FixedPt<uint8_t, 5, 3> a{.whole=8, .frac=7};
    FixedPt< a_wid, a_frac> a(8.25);
    FixedPt< a_wid, a_frac> aa(8.25);
+   auto cc = a + aa;
    std::cout << "size of a: " << sizeof a << std::endl;
    std::cout << "max value for a: " << a.max_val() << std::endl;
    float fn = 2.5f;
    FixedPt< b_wid, b_frac> b(fn);
+   auto cc2 = a + b;
+   std::cout << "cc2.wwidth() " << int(cc2.wwidth()) << " cc2.fracwidth() " << int(cc2.fracwidth()) << std::endl;
    std::cout << "b bits: " << b.to_bitset() << std::endl;
    auto c = a.add(a);
    std::cout << "c bits; " << c.to_bitset() << std::endl;
