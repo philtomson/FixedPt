@@ -181,13 +181,6 @@ auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
    return FixedPt<WWID,FWID>(a.val + b.val);
 }
 
-// infix + for FixedPts of differing widths
-template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
-auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
-                                                                          std::max(AFWID,BFWID)>
-{
-   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val + b.val);
-}
 
 // infix - for FixedPts of same width
 template<uint8_t WWID, uint8_t FWID> 
@@ -198,10 +191,17 @@ auto operator-(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 
 // infix + for FixedPts of differing widths
 template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
-auto operator-(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
                                                                           std::max(AFWID,BFWID)>
 {
-   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val - b.val);
+   auto larger_frac_val  = (a.fracwidth() >= b.fracwidth())? a.val : b.val;
+   auto larger_frac_wid  = (a.fracwidth() >= b.fracwidth())? a.fracwidth() : b.fracwidth();
+   auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
+   auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
+   
+   auto shift_by     = larger_frac_wid - smaller_frac_wid;
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
+                       (larger_frac_val + (smaller_frac_val << shift_by));
 }
 
 // infix * for FixedPts of same width
@@ -216,22 +216,56 @@ template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID>
 auto operator*(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
                                                                           std::max(AFWID,BFWID)>
 {
-   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val * b.val);
+   auto larger_frac_val  = (a.fracwidth() >= b.fracwidth())? a.val : b.val;
+   auto larger_frac_wid  = (a.fracwidth() >= b.fracwidth())? a.fracwidth() : b.fracwidth();
+   auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
+   auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
+   
+   auto shift_by     = larger_frac_wid - smaller_frac_wid;
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
+                       (larger_frac_val * (smaller_frac_val << shift_by));
 }
+
+// infix - for FixedPts of differing widths - non-commutative op
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
+auto operator-(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+                                                                          std::max(AFWID,BFWID)>
+{
+   auto larger_frac_val  = (a.fracwidth() >= b.fracwidth())? a.val : b.val;
+   auto larger_frac_wid  = (a.fracwidth() >= b.fracwidth())? a.fracwidth() : b.fracwidth();
+   auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
+   auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
+   
+   auto shift_by = larger_frac_wid - smaller_frac_wid;
+   auto diff = (a.val == smaller_frac_val) ? ((a.val << shift_by) - b.val) :
+                                             (a.val - (b.val << shift_by));
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(diff);
+}
+
+// infix / for FixedPts of differing widths - non-commutative op
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
+auto operator/(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
+                                                                          std::max(AFWID,BFWID)>
+{
+   auto larger_frac_val  = (a.fracwidth() >= b.fracwidth())? a.val : b.val;
+   auto larger_frac_wid  = (a.fracwidth() >= b.fracwidth())? a.fracwidth() : b.fracwidth();
+   auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
+   auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
+   
+   auto shift_by = larger_frac_wid - smaller_frac_wid;
+   auto div = (a.val == smaller_frac_val)? 
+        int((float(a.val<<shift_by)/float(b.val))*(1 << std::max(AFWID,BFWID))):
+        int((float(a.val)/float(b.val<<shift_by))*(1 << std::max(AFWID,BFWID)));
+   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(div);
+}
+
+
 
 // infix / for FixedPts of same width
 template<uint8_t WWID, uint8_t FWID> 
 auto operator/(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
-   return FixedPt<WWID,FWID>(a.val / b.val);
-}
-
-// infix / for FixedPts of differing widths
-template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
-auto operator/(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
-                                                                          std::max(AFWID,BFWID)>
-{
-   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(a.val / b.val);
+   return FixedPt<WWID,FWID>(int((float(a.val)/float(b.val))*(1 << FWID)));
 }
 
 } //namespace FP
