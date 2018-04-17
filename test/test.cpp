@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fixedpt.hpp>
 #include <bitset>
+#include <assert.h>
 using namespace FP;
 int main(){
    constexpr uint8_t a_wid  = 5;
@@ -14,15 +15,26 @@ int main(){
    constexpr uint8_t b_frac = 4;
    //FixedPt<uint8_t, 5, 3> a{.whole=8, .frac=7};
    FixedPt< a_wid, a_frac> a(8.25);
+   std::cout << "a.to_f(): " << a.to_f() << std::endl;
+   assert(a.to_f() == 8.25) ;
    FixedPt< a_wid, a_frac> aa(8.25);
    FixedPt< a_wid, a_frac> aaa(a);
    auto cc = a + aa;
    std::cout << "size of a: " << sizeof a << std::endl;
+   assert((sizeof a) == 1);
    std::cout << "max value for a: " << a.max_val() << std::endl;
    float fn = 2.5f;
    FixedPt< b_wid, b_frac> b(fn);
+   assert(b.to_f() == 2.5);
    auto cc2 = a + b;
    std::cout << "cc2.wwidth() " << int(cc2.wwidth()) << " cc2.fracwidth() " << int(cc2.fracwidth()) << std::endl;
+   assert(cc2.wwidth() == std::max(a.wwidth(), b.wwidth()));
+   assert(cc2.fracwidth() == std::max(a.fracwidth(), b.fracwidth()));
+   auto comp = std::bitset<std::max(a_wid, b_wid)+
+                           std::max(a_frac, b_frac)>{std::string("010101100")};
+   assert(cc2.to_bitset() == std::bitset<std::max(a_wid, b_wid)+
+                                         std::max(a_frac, b_frac)>{std::string("010101100")});
+   
    std::cout << "a bits: " << a.to_bitset() << std::endl;
    std::cout << "b bits: " << b.to_bitset() << std::endl;
    std::cout << "cc2 bits " << cc2.to_bitset()  << std::endl;

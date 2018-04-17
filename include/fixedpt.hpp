@@ -29,6 +29,8 @@
  *   that keeps track of the maximum value a FixedPt has seen.
  * * Need to add conversion functions/casts to convert to different sizes
  */
+#ifndef FIXEDPT_HPP_INCLUDED
+#define FIXEDPT_HPP_INCLUDED
 #include <cstdint>
 #include <iostream>
 #include <algorithm>
@@ -95,6 +97,20 @@ struct FixedPt {
       int max_val() {
          constexpr const int max_val = (1<<(WWIDTH+FRACWIDTH))-1;
          return (max_val);
+      }
+
+      double to_f(){
+         double fractional = 0.0;
+         auto v = val;
+         for(int i = -(FRACWIDTH); i != 0; ++i){
+            if(v & 0x1) {
+               fractional += pow(2.0, i);
+            }
+            v = v >> 1;
+         }
+         // v should now hold only the whole part of the value
+         // fractional should now hold the fractional part
+         return double(v)+fractional;
       }
 
       //default c'tor
@@ -269,3 +285,4 @@ auto operator/(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 }
 
 } //namespace FP
+#endif //FIXEDPT_HPP_INCLUDED
