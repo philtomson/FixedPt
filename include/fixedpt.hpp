@@ -37,7 +37,7 @@
 #include <math.h>
 #include <bitset>
 
-namespace FP {
+namespace FPMath {
 //set SAT to true if you want values to saturate instead of overflow
 static bool SAT = true; 
 
@@ -117,7 +117,7 @@ struct FixedPt {
       FixedPt() : val(0) { }
 
       //move c'tor
-      FixedPt(val_t&& v) : val(v) { }
+      FixedPt(const val_t&& v) : val(v) { }
 
       // c'tor from double
       FixedPt(const double& n) {
@@ -138,7 +138,7 @@ struct FixedPt {
       }
 
       // move c'tor
-      FixedPt(FP&& o){
+      FixedPt(const FP&& o){
          val = o.val;
       }
 
@@ -174,7 +174,7 @@ struct FixedPt {
       }
 
       //destructive add:
-      void add_(FixedPt& n) {
+      void add_(const FixedPt& n) {
          int res = static_cast<int>(val + n.val);
          if(SAT && (res > max_val())) 
             val = max_val();
@@ -182,7 +182,7 @@ struct FixedPt {
             val = val + n.val; 
       }
 
-      auto add(FixedPt& n) {
+      auto add(const FixedPt& n) {
          auto res = val + n.val;
          if(SAT && (res > max_val())) 
             res = max_val();
@@ -254,7 +254,7 @@ auto operator-(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    
    auto shift_by = larger_frac_wid - smaller_frac_wid;
    auto diff = (a.val == smaller_frac_val) ? ((a.val << shift_by) - b.val) :
-                                             (a.val - (b.val << shift_by));
+                                              (a.val - (b.val << shift_by));
    return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>(diff);
 }
 

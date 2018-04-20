@@ -7,7 +7,7 @@
 #include <fixedpt.hpp>
 #include <bitset>
 #include <assert.h>
-using namespace FP;
+using namespace FPMath;
 int main(){
    constexpr uint8_t a_wid  = 5;
    constexpr uint8_t b_wid  = 4;
