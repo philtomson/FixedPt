@@ -194,7 +194,12 @@ struct FixedPt {
 template<uint8_t WWID, uint8_t FWID> 
 auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
-   return FixedPt<WWID,FWID>(a.val + b.val);
+   auto sum = FixedPt<WWID,FWID>(a.val + b.val);
+   if(SAT && ((sum.val < a.val) || (sum.val < b.val))) {
+      sum = sum.max_val();
+   }
+   //return FixedPt<WWID,FWID>(a.val + b.val);
+   return sum;
 }
 
 
@@ -224,7 +229,11 @@ auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
 template<uint8_t WWID, uint8_t FWID> 
 auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
-   return FixedPt<WWID,FWID>(a.val * b.val);
+   auto prod = FixedPt<WWID,FWID>(a.val * b.val);
+   if(SAT && ((prod.val < a.val) || (prod.val < b.val)))
+      prod = prod.max_val();
+   //return FixedPt<WWID,FWID>(a.val * b.val);
+   return prod;
 }
 
 // infix * for FixedPts of differing widths
