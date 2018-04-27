@@ -86,6 +86,12 @@ struct FixedPt {
          return std::bitset<WWIDTH+FRACWIDTH>(val);
       }
 
+      std::string to_bitstring(){
+         std::bitset bits   = this->to_bitset();
+         std::string bitstr = bits.to_string();
+         return bitstr.insert(WWIDTH, ".");
+      }
+
       uint8_t wwidth(){
          return WWIDTH;
       }
@@ -99,7 +105,7 @@ struct FixedPt {
          return (max_val);
       }
 
-      double to_f(){
+      double to_double(){
          double fractional = 0.0;
          auto v = val;
          for(int i = -(FRACWIDTH); i != 0; ++i){
@@ -112,6 +118,13 @@ struct FixedPt {
          // fractional should now hold the fractional part
          return double(v)+fractional;
       }
+
+      float to_f(){
+         return float(this->to_double());
+      }
+
+      operator float()  { return this->to_f(); }
+      operator double() { return this->to_double(); }
 
       //default c'tor
       FixedPt() : val(0) { }
@@ -234,9 +247,9 @@ auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
    //This could be problematic if 2*(WWID+FWID) > 64!
    auto prod  = FixedPt<2*WWID,2*FWID>(a.val * b.val);
    auto prod2 = FixedPt<WWID, FWID>(prod.val >> FWID);
-   //if(SAT && ((prod.val < a.val) || (prod.val < b.val)))
-   //   prod = prod.max_val();
-
+   if(SAT && (prod.val >> (WWID+2*FWID)) > 0){
+      prod2.val = prod2.max_val();
+   }
    return prod2;
 }
 
@@ -249,13 +262,17 @@ auto operator*(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    auto larger_frac_wid  = (a.fracwidth() >= b.fracwidth())? a.fracwidth() : b.fracwidth();
    auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
    auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
+   const auto max_wwid = std::max(AWWID, BWWID);
+   const auto max_fwid = std::max(AFWID, BFWID);
    
    auto shift_by     = larger_frac_wid - smaller_frac_wid;
-   auto prod = FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
+   auto prod  = FixedPt<max_wwid*2,max_fwid*2>
                        (larger_frac_val * (smaller_frac_val << shift_by));
-   if(SAT && ((prod.val < a.val) || (prod.val < b.val)))
-      prod = prod.max_val();
-   return prod;
+   auto prod2 = FixedPt<max_wwid, max_fwid>(prod.val >> max_fwid);
+   if(SAT && (prod.val >> (max_wwid+2*max_fwid)) > 0) {
+      prod2 = prod2.max_val();
+   }
+   return prod2;
 }
 
 // infix - for FixedPts of differing widths - non-commutative op

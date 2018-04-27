@@ -36,7 +36,7 @@ of concept and a work in progress - not all operations are supported yet.
      add a common base class so operations could be defined, but that would
      add overhead of virtual functions (the vptr).
   
-## Using
+## Usage
 
      See test.cpp in the tests directory.
   
@@ -48,4 +48,6 @@ of concept and a work in progress - not all operations are supported yet.
      that keeps track of the maximum value a FixedPt has seen).
 
    * Need to add conversion functions/casts to convert to different sizes.
+
+   * wrappers for Julia using Cxx.jl?
 

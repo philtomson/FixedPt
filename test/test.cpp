@@ -16,7 +16,8 @@ int main(){
    //FixedPt<uint8_t, 5, 3> a{.whole=8, .frac=7};
    FixedPt< a_wid, a_frac> a(8.25);
    std::cout << "a.to_f(): " << a.to_f() << std::endl;
-   assert(a.to_f() == 8.25) ;
+   std::cout << "double(a): " << double(a) << std::endl;
+   assert(float(a) == 8.25) ;
    FixedPt< a_wid, a_frac> aa(8.25);
    FixedPt< a_wid, a_frac> aaa(a);
    auto cc = a + aa;
@@ -35,54 +36,72 @@ int main(){
    assert(cc2.to_bitset() == std::bitset<std::max(a_wid, b_wid)+
                                          std::max(a_frac, b_frac)>{std::string("010101100")});
    
-   std::cout << "a bits: " << a.to_bitset() << std::endl;
-   std::cout << "b bits: " << b.to_bitset() << std::endl;
-   std::cout << "cc2 bits " << cc2.to_bitset()  << std::endl;
+   std::cout << "a bits: " << a.to_bitstring() << std::endl;
+   std::cout << "b bits: " << b.to_bitstring() << std::endl;
+   std::cout << "cc2 bits " << cc2.to_bitstring()  << std::endl;
 
    auto c = a.add(a);
-   std::cout << "c bits; " << c.to_bitset() << std::endl;
+   std::cout << "c bits; " << c.to_bitstring() << std::endl;
    std::cout << "sizeof c: " << sizeof c << std::endl;
    auto diff = a - aa; // should be 0
-   std::cout << "diff  bits " << diff.to_bitset()  << std::endl;
+   std::cout << "diff  bits " << diff.to_bitstring()  << std::endl;
    auto diff2 = aa - a; // should be 0
-   std::cout << "diff2 bits " << diff2.to_bitset()  << std::endl;
+   std::cout << "diff2 bits " << diff2.to_bitstring()  << std::endl;
    auto div = aa/aaa; // should be 1
-   std::cout << "div  bits " << div.to_bitset()  << std::endl;
+   std::cout << "div  bits " << div.to_bitstring()  << std::endl;
+   assert(float(div) == 1.0);
+   assert(div.to_bitstring() == "00001.000");
    auto div2= (FixedPt<a_wid,a_frac>(1.0)/FixedPt<a_wid,a_frac>(2.0));
-   std::cout << "div2 bits " << div2.to_bitset()  << std::endl;
+   std::cout << "div2 bits " << div2.to_bitstring()  << std::endl;
    auto div3= (FixedPt<a_wid,a_frac>(7.0)/FixedPt<b_wid,b_frac>(2.0));
-   std::cout << "div3 bits " << div3.to_bitset()  << std::endl;
+   std::cout << "div3 bits " << div3.to_bitstring()  << std::endl;
 
    auto mult = aa*FixedPt<a_wid,a_frac>(2.0);  // should be 16.5
-   std::cout << "mult  bits " << mult.to_bitset()  << std::endl;
+   std::cout << "mult  bits " << mult.to_bitstring()  << std::endl;
+   assert(float(mult) == 16.5);
+
    auto mult2= (FixedPt<a_wid,a_frac>(1.25)*FixedPt<a_wid,a_frac>(2.0));
-   std::cout << "mult2 bits " << mult2.to_bitset()  << std::endl;
+   std::cout << "mult2 bits " << mult2.to_bitstring()  << std::endl;
+   assert(float(mult2) == 2.5);
+   assert(mult2.to_bitstring() == "00010.100");
+
    auto mult3= (FixedPt<a_wid,a_frac>(7.0)*FixedPt<b_wid,b_frac>(2.0));
-   std::cout << "mult3 bits " << mult3.to_bitset()  << std::endl;
+   std::cout << "mult3 bits " << mult3.to_bitstring()  << std::endl;
+   assert(float(mult3) == 14.0);
+   assert(mult3.to_bitstring() == "01110.0000");
 
    auto mult4 = (FixedPt<5, 3>(1.5)*FixedPt<5,3>(1.5));
-   std::cout << "mult4 bits " << mult4.to_bitset() << std::endl;
+   std::cout << "mult4 bits " << mult4.to_bitstring() << std::endl;
+   assert(float(mult4) == 2.25);
+   assert(mult4.to_bitstring() == "00010.010");
 
-   std::cout << "aa  bits " << aa.to_bitset()  << std::endl;
+   auto mult5 = (FixedPt<3, 3>(4.25)*FixedPt<3,3>(4.0));
+   std::cout << "mult5 bits " << mult5.to_bitstring() << " (should saturate)"<< std::endl;
+   assert(mult5.to_bitstring() == "111.111");
+
+   auto mult6 = (FixedPt<2,4>(2.25)*FixedPt<5,3>(1.5));
+   std::cout << "mult6 bits " << mult6.to_bitstring() << std::endl;
+   assert(float(mult6) == 3.375);
+   assert(mult6.to_bitstring() == "00011.0110");
+
+   FixedPt<3,3> maxout;
+   //maxout = maxout.max_val();
+   std::cout << "maxout.max_val() is: "<< std::hex << maxout.max_val() << std::endl;
+
+   std::cout << "aa  bits " << aa.to_bitstring()  << std::endl;
    auto two = FixedPt<a_wid, a_frac>(2);
-   std::cout << "two  bits " << two.to_bitset()  << std::endl;
-   /* 
-   for(uint8_t i = 1; i < 8; ++i){
-      FixedPt<(8-i), i> some(8.25);
-      std::cout << "some.bits: " << some.to_bitset() << std::endl;
-   }
-   */
+   std::cout << "two  bits " << two.to_bitstring()  << std::endl;
    
-   std::cout << "a bits: " << a.to_bitset() << std::endl;
-   for(int i = 0; i < 10; ++i){
+   std::cout << "a bits: " << a.to_bitstring() << std::endl;
+   for(int i = 0; i < 3; ++i){
       a.add_(a);
-      std::cout << "a bits: " << a.to_bitset() << std::endl;
+      std::cout << "a bits: " << a.to_bitstring() << std::endl;
    }
    a = aa.add(aa);
-   std::cout << "after assignment: a bits: " << a.to_bitset() << std::endl;
+   std::cout << "after assignment: a bits: " << a.to_bitstring() << std::endl;
    aa = 4.4;
    aa = (4.4 + 1.1);
-   std::cout << "aa bits; " << aa.to_bitset() << std::endl;
+   std::cout << "aa bits; " << aa.to_bitstring() << std::endl;
 
    FixedPt<17,16> zz(1.5);
    std::cout << "sizeof zz: " << sizeof zz << std::endl;
