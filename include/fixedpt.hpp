@@ -198,7 +198,6 @@ auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
    if(SAT && ((sum.val < a.val) || (sum.val < b.val))) {
       sum = sum.max_val();
    }
-   //return FixedPt<WWID,FWID>(a.val + b.val);
    return sum;
 }
 
@@ -220,20 +219,25 @@ auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
    auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
    
-   auto shift_by     = larger_frac_wid - smaller_frac_wid;
-   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
+   auto shift_by = larger_frac_wid - smaller_frac_wid;
+   auto sum      = FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
                        (larger_frac_val + (smaller_frac_val << shift_by));
+   if(SAT && ((sum.val < a.val) || (sum.val < b.val))) 
+      sum = sum.max_val();
+   return sum;
 }
 
 // infix * for FixedPts of same width
 template<uint8_t WWID, uint8_t FWID> 
 auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
-   auto prod = FixedPt<WWID,FWID>(a.val * b.val);
-   if(SAT && ((prod.val < a.val) || (prod.val < b.val)))
-      prod = prod.max_val();
-   //return FixedPt<WWID,FWID>(a.val * b.val);
-   return prod;
+   //This could be problematic if 2*(WWID+FWID) > 64!
+   auto prod  = FixedPt<2*WWID,2*FWID>(a.val * b.val);
+   auto prod2 = FixedPt<WWID, FWID>(prod.val >> FWID);
+   //if(SAT && ((prod.val < a.val) || (prod.val < b.val)))
+   //   prod = prod.max_val();
+
+   return prod2;
 }
 
 // infix * for FixedPts of differing widths
@@ -247,8 +251,11 @@ auto operator*(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
    
    auto shift_by     = larger_frac_wid - smaller_frac_wid;
-   return FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
+   auto prod = FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
                        (larger_frac_val * (smaller_frac_val << shift_by));
+   if(SAT && ((prod.val < a.val) || (prod.val < b.val)))
+      prod = prod.max_val();
+   return prod;
 }
 
 // infix - for FixedPts of differing widths - non-commutative op

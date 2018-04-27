@@ -60,6 +60,9 @@ int main(){
    auto mult3= (FixedPt<a_wid,a_frac>(7.0)*FixedPt<b_wid,b_frac>(2.0));
    std::cout << "mult3 bits " << mult3.to_bitset()  << std::endl;
 
+   auto mult4 = (FixedPt<5, 3>(1.5)*FixedPt<5,3>(1.5));
+   std::cout << "mult4 bits " << mult4.to_bitset() << std::endl;
+
    std::cout << "aa  bits " << aa.to_bitset()  << std::endl;
    auto two = FixedPt<a_wid, a_frac>(2);
    std::cout << "two  bits " << two.to_bitset()  << std::endl;
