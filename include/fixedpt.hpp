@@ -145,7 +145,14 @@ struct FixedPt {
          val = float2fixed<float>(n);
       }
 
-      // copy c'tor
+      /* TODO
+      // c'tor from bit string
+      FixedPt(const std::string& s){
+
+      }
+      */
+
+      // copy c'tor both FixedPt's are same size
       FixedPt(const FP& other){
          val = other.val;
       }
@@ -209,7 +216,7 @@ auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
    auto sum = FixedPt<WWID,FWID>(a.val + b.val);
    if(SAT && ((sum.val < a.val) || (sum.val < b.val))) {
-      sum = sum.max_val();
+      sum.val = sum.max_val();
    }
    return sum;
 }
@@ -236,7 +243,7 @@ auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    auto sum      = FixedPt<std::max(AWWID,BWWID),std::max(AFWID,BFWID)>
                        (larger_frac_val + (smaller_frac_val << shift_by));
    if(SAT && ((sum.val < a.val) || (sum.val < b.val))) 
-      sum = sum.max_val();
+      sum.val = sum.max_val();
    return sum;
 }
 
@@ -244,7 +251,7 @@ auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
 template<uint8_t WWID, uint8_t FWID> 
 auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
-   //This could be problematic if 2*(WWID+FWID) > 64!
+   //This will be problematic if 2*(WWID+FWID) > 64!
    auto prod  = FixedPt<2*WWID,2*FWID>(a.val * b.val);
    auto prod2 = FixedPt<WWID, FWID>(prod.val >> FWID);
    if(SAT && (prod.val >> (WWID+2*FWID)) > 0){
@@ -266,11 +273,12 @@ auto operator*(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    const auto max_fwid = std::max(AFWID, BFWID);
    
    auto shift_by     = larger_frac_wid - smaller_frac_wid;
+   //This will be problematic if 2*(max_wwid+max_fwid) > 64!
    auto prod  = FixedPt<max_wwid*2,max_fwid*2>
                        (larger_frac_val * (smaller_frac_val << shift_by));
    auto prod2 = FixedPt<max_wwid, max_fwid>(prod.val >> max_fwid);
    if(SAT && (prod.val >> (max_wwid+2*max_fwid)) > 0) {
-      prod2 = prod2.max_val();
+      prod2.val = prod2.max_val();
    }
    return prod2;
 }

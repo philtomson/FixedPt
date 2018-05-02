@@ -47,6 +47,15 @@ int main(){
    std::cout << "diff  bits " << diff.to_bitstring()  << std::endl;
    auto diff2 = aa - a; // should be 0
    std::cout << "diff2 bits " << diff2.to_bitstring()  << std::endl;
+   auto s1 = FixedPt<6,5>(2.5);
+   std::cout << "s1 bits " << s1.to_bitstring()  << std::endl;
+   auto s2 = FixedPt<6,5>(3.5);
+   std::cout << "s2 bits " << s2.to_bitstring()  << std::endl;
+   auto diff3 = (s1-s2);
+   std::cout << "diff3 bits " << diff3.to_bitstring()  << std::endl;
+   auto addend = (s2 + diff3);
+   std::cout << "addend bits " << addend.to_bitstring()  << std::endl;
+   assert(addend.val == 0x7ff);
    auto div = aa/aaa; // should be 1
    std::cout << "div  bits " << div.to_bitstring()  << std::endl;
    assert(float(div) == 1.0);
