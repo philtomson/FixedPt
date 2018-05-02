@@ -42,36 +42,62 @@ namespace FPMath {
 static bool SAT = true; 
 
 //if it resolves to this TypeForSize_ type then you'll get a compiler error:
-template<std::size_t N, typename=void> 
+template<std::size_t N, bool Signed=false, typename=void, typename=void> 
 struct TypeForSize_;
 
-template<std::size_t N>
-struct TypeForSize_<N, std::enable_if_t< (N > 0 && N < 9)>>
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 0 && N < 9)>, std::enable_if_t<!Signed>>
 {
    using type = uint8_t;
 };
 
-template<std::size_t N>
-struct TypeForSize_<N, std::enable_if_t< (N > 8 && N < 17 )>>
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 0 && N < 9)>, std::enable_if_t<Signed>>
+{
+   using type = int8_t;
+};
+
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 8 && N < 17 )>, std::enable_if_t<!Signed>>
 {
    using type = uint16_t;
 };
 
-template<std::size_t N>
-struct TypeForSize_<N, std::enable_if_t< (N > 16 && N < 33 )>>
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 8 && N < 17 )>, std::enable_if_t<Signed>>
+{
+   using type = int16_t;
+};
+
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 16 && N < 33 )>, std::enable_if_t<!Signed>>
 {
    using type = uint32_t;
 };
 
-template<std::size_t N>
-struct TypeForSize_<N, std::enable_if_t< (N > 32 && N < 65 )>>
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 16 && N < 33 )>, std::enable_if_t<Signed>>
+{
+   using type = int32_t;
+};
+
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 32 && N < 65 )>, std::enable_if_t<!Signed>>
 {
    using type = uint64_t;
 };
 
-template< uint8_t WWIDTH, uint8_t FRACWIDTH>
+template<std::size_t N, bool Signed>
+struct TypeForSize_<N, Signed, std::enable_if_t< (N > 32 && N < 65 )>, std::enable_if_t<Signed>>
+{
+   using type = int64_t;
+};
+
+
+template< uint8_t WWIDTH, uint8_t FRACWIDTH, bool Signed=false>
 struct FixedPt {
-      using val_t = typename TypeForSize_<WWIDTH+FRACWIDTH>::type;
+      
+      using val_t = typename TypeForSize_<WWIDTH+FRACWIDTH, Signed>::type;
 
       using FP = FixedPt< WWIDTH, FRACWIDTH>;
       constexpr static const int MAX_VAL = (1 << (WWIDTH+FRACWIDTH))-1;
@@ -210,7 +236,7 @@ struct FixedPt {
       }
 };
 
-// infix + for FixedPts of same width
+// infix + for FixedPts of same width and both unsigned
 template<uint8_t WWID, uint8_t FWID> 
 auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
@@ -221,15 +247,32 @@ auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
    return sum;
 }
 
+// infix + for FixedPts of same width and both signed
+template<uint8_t WWID, uint8_t FWID> 
+auto operator+(FixedPt<WWID,FWID,true> a, FixedPt<WWID,FWID,true> b)
+{
+   auto sum = FixedPt<WWID,FWID,true>(a.val + b.val);
+   if(SAT && ((sum.val < a.val) || (sum.val < b.val))) {
+      sum.val = sum.max_val();
+   }
+   return sum;
+}
 
-// infix - for FixedPts of same width
+// infix - for FixedPts of same width and both unsigned
 template<uint8_t WWID, uint8_t FWID> 
 auto operator-(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
    return FixedPt<WWID,FWID>(a.val - b.val);
 }
 
-// infix + for FixedPts of differing widths
+// infix - for FixedPts of same width and both signed
+template<uint8_t WWID, uint8_t FWID> 
+auto operator-(FixedPt<WWID,FWID,true> a, FixedPt<WWID,FWID,true> b)
+{
+   return FixedPt<WWID,FWID,true>(a.val - b.val);
+}
+
+// infix + for FixedPts of differing widths and both unsigned
 template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
 auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::max(AWWID,BWWID), 
                                                                           std::max(AFWID,BFWID)>
@@ -247,7 +290,7 @@ auto operator+(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    return sum;
 }
 
-// infix * for FixedPts of same width
+// infix * for FixedPts of same width and both unsigned
 template<uint8_t WWID, uint8_t FWID> 
 auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
@@ -259,6 +302,20 @@ auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
    }
    return prod2;
 }
+
+// infix * for FixedPts of same width and both signed
+template<uint8_t WWID, uint8_t FWID> 
+auto operator*(FixedPt<WWID,FWID,true> a, FixedPt<WWID,FWID,true> b)
+{
+   //This will be problematic if 2*(WWID+FWID) > 64!
+   auto prod  = FixedPt<2*WWID,2*FWID,true>(a.val * b.val);
+   auto prod2 = FixedPt<WWID, FWID,true>(prod.val >> FWID);
+   if(SAT && (prod.val >> (WWID+2*FWID)) > 0){
+      prod2.val = prod2.max_val();
+   }
+   return prod2;
+}
+
 
 // infix * for FixedPts of differing widths
 template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
@@ -318,11 +375,18 @@ auto operator/(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
 
 
 
-// infix / for FixedPts of same width
+// infix / for FixedPts of same width both unsigned
 template<uint8_t WWID, uint8_t FWID> 
 auto operator/(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
    return FixedPt<WWID,FWID>(int((float(a.val)/float(b.val))*(1 << FWID)));
+}
+
+// infix / for FixedPts of same width both signed
+template<uint8_t WWID, uint8_t FWID> 
+auto operator/(FixedPt<WWID,FWID,true> a, FixedPt<WWID,FWID,true> b)
+{
+   return FixedPt<WWID,FWID,true>(int((float(a.val)/float(b.val))*(1 << FWID)));
 }
 
 } //namespace FP
