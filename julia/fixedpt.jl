@@ -13,6 +13,8 @@ val_t(total_wid, s::Bool) =
                     s ? Int32 : UInt32
                  elseif(32 < total_wid < 65)
                     s ? Int64 : UInt64
+                 elseif(64 < total_wid < 129)
+                    s ? Int128 : UInt128
                  else
                     UInt64
                  end
