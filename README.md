@@ -49,5 +49,9 @@ of concept and a work in progress - not all operations are supported yet.
 
    * Need to add conversion functions/casts to convert to different sizes.
 
-   * wrappers for Julia using Cxx.jl?
+   * wrappers for Julia using Cxx.jl? : As it turns out this is problematic. C++ does not allow non-const references to bitfields and Cxx.jl needs to take a reference to the val member of the FixedPt struct in order to pass values back to the Julia side. Hence I've started working on a separate FixedPt.jl implementation.
+     
+## Gotchyas:
+
+   * The FixedPt struct contains a bit field member (val). Therefore you cannot take a pointer or non-const reference to this bitfield.
 
