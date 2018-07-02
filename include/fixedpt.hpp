@@ -113,7 +113,7 @@ struct FixedPt {
       }
 
       std::string to_bitstring(){
-         std::bitset bits   = this->to_bitset();
+         std::bitset<WWIDTH+FRACWIDTH> bits  = this->to_bitset();
          std::string bitstr = bits.to_string();
          return bitstr.insert(WWIDTH, ".");
       }
