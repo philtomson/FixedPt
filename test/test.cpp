@@ -7,6 +7,7 @@
 #include <fixedpt.hpp>
 #include <bitset>
 #include <assert.h>
+#include <cstdint>
 using namespace FPMath;
 int main(){
    constexpr uint8_t a_wid  = 5;
@@ -79,6 +80,13 @@ int main(){
    assert(float(mult3) == 14.0);
    assert(mult3.to_bitstring() == "01110.0000");
 
+   auto mult3s= (FixedPt<4,4,true>(7.0)*FixedPt<4,4,true>(2.0));
+   std::cout << "mult3s bits " << mult3s.to_bitstring()  << std::endl;
+   std::cout << "mult3s to float: " << float(mult3s)  << std::endl;
+   assert(float(mult3s) == 6.0);
+   assert(mult3s.to_bitstring() == "0110.0000");
+   
+
    auto mult4 = (FixedPt<5, 3>(1.5)*FixedPt<5,3>(1.5));
    std::cout << "mult4 bits " << mult4.to_bitstring() << std::endl;
    assert(float(mult4) == 2.25);
@@ -112,7 +120,14 @@ int main(){
    aa = (4.4 + 1.1);
    std::cout << "aa bits; " << aa.to_bitstring() << std::endl;
 
-   FixedPt<17,16> zz(1.5);
+   //FixedPt<17,16> zz(1.5);
+   FixedPt<17,16,true> zz(8589934591.25);
    std::cout << "sizeof zz: " << sizeof zz << std::endl;
+   std::cout << "zz bits: " << zz.to_bitstring() << std::endl;
+   std::cout << "sizeof(zz): " << sizeof(zz) << std::endl;
+   auto zzmax = zz.max_val();
+   auto shift_amt = (uint64_t(1) << (17+16))-1;
+   std::cout <<  "zz.max_val() is: " << std::dec << (zzmax) << std::endl;
+   
 
 }

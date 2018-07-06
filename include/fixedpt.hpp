@@ -100,12 +100,19 @@ struct FixedPt {
       using val_t = typename TypeForSize_<WWIDTH+FRACWIDTH, Signed>::type;
 
       using FP = FixedPt< WWIDTH, FRACWIDTH>;
-      constexpr static const int MAX_VAL = (1 << (WWIDTH+FRACWIDTH))-1;
+      constexpr static const int 
+         MAX_VAL = Signed? (val_t(1) << (WWIDTH+FRACWIDTH-1))-1 :
+                           (val_t(1) << (WWIDTH+FRACWIDTH))-1;
       val_t val    : (WWIDTH + FRACWIDTH);
 
       template<typename FT>
       val_t float2fixed(const FT& n){
-         return static_cast<val_t>(round(n * pow(2.0, FRACWIDTH)));  
+         val_t ret_val; 
+         if(SAT && n > max_val())
+            ret_val = max_val();
+         else
+            ret_val = static_cast<val_t>(round(n * pow(2.0, FRACWIDTH))); 
+         return ret_val;
       }
 
       std::bitset<WWIDTH+FRACWIDTH> to_bitset(){
@@ -126,8 +133,18 @@ struct FixedPt {
          return FRACWIDTH;
       }
 
-      int max_val() {
-         constexpr const int max_val = (1<<(WWIDTH+FRACWIDTH))-1;
+      val_t max_val() {
+         //constexpr const int max_val = (1<<(WWIDTH+FRACWIDTH))-1;
+
+         constexpr const val_t max_val = 
+            Signed ?  (val_t(1) << (WWIDTH+FRACWIDTH-1))-1 :
+                      (val_t(1) << (WWIDTH+FRACWIDTH  ))-1;
+                                               
+         //std::cout << std::dec << "WWIDTH: " << unsigned(WWIDTH) << " FRACWIDTH " << unsigned(FRACWIDTH) << std::endl << std::flush; 
+         /*
+         val_t max_val = Signed?(val_t(1) << (WWIDTH+FRACWIDTH-1))-1 :
+                                (val_t(1) << (WWIDTH+FRACWIDTH))-1;
+                                */
          return (max_val);
       }
 
@@ -160,14 +177,14 @@ struct FixedPt {
 
       // c'tor from double
       FixedPt(const double& n) {
-         uint64_t whole = static_cast<uint64_t>(n);
-         float frac  = n - whole;
+         //uint64_t whole = static_cast<uint64_t>(n);
+         //float frac  = n - whole;
          val = float2fixed(n);
       }
 
       // c'tor from float
       FixedPt(const float& n) {
-         uint64_t whole = static_cast<uint64_t>(n);
+         //uint64_t whole = static_cast<uint64_t>(n);
          val = float2fixed<float>(n);
       }
 
@@ -302,17 +319,21 @@ auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
    }
    return prod2;
 }
-
-// infix * for FixedPts of same width and both signed
-template<uint8_t WWID, uint8_t FWID> 
-auto operator*(FixedPt<WWID,FWID,true> a, FixedPt<WWID,FWID,true> b)
+// infix * for FixedPts of same width and same signedness
+template<uint8_t WWID, uint8_t FWID, bool SIGNED> 
+auto operator*(FixedPt<WWID,FWID,SIGNED> a, FixedPt<WWID,FWID,SIGNED> b)
 {
    //This will be problematic if 2*(WWID+FWID) > 64!
-   auto prod  = FixedPt<2*WWID,2*FWID,true>(a.val * b.val);
-   auto prod2 = FixedPt<WWID, FWID,true>(prod.val >> FWID);
+   auto prod  = FixedPt<2*WWID,2*FWID,SIGNED>(a.val * b.val);
+   auto prod2 = FixedPt<WWID, FWID,SIGNED>(prod.val >> FWID);
+   if(SIGNED && ((a.val > 0 && b.val > 0) || (a.val < 0 && b.val < 0))){ 
+      //make sure the sign bit is cleared in this case:
+      prod2.val = prod2.val & (prod2.max_val() );
+   }
+   /* //this should now be taken care of in the c'tor:
    if(SAT && (prod.val >> (WWID+2*FWID)) > 0){
       prod2.val = prod2.max_val();
-   }
+   }*/
    return prod2;
 }
 
