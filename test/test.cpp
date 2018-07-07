@@ -96,14 +96,29 @@ int main(){
    std::cout << "mult5 bits " << mult5.to_bitstring() << " (should saturate)"<< std::endl;
    assert(mult5.to_bitstring() == "111.111");
 
+   //test multiplication with different sizes
    auto mult6 = (FixedPt<2,4>(2.25)*FixedPt<5,3>(1.5));
    std::cout << "mult6 bits " << mult6.to_bitstring() << std::endl;
    assert(float(mult6) == 3.375);
    assert(mult6.to_bitstring() == "00011.0110");
 
+   //test multiplication with different sizes & saturation 
+   auto mult6a = (FixedPt<3,4>(6.25)*FixedPt<2,3>(2.5));
+   std::cout << "mult6a bits " << mult6a.to_bitstring() << std::endl;
+   std::cout << "float(mult6a): " << float(mult6a) << std::endl;
+   assert(float(mult6a) == 7.9375);
+   assert(mult6a.to_bitstring() == "111.1111");
+
+   //test multiplication with different sizes same signedness
+   auto mult6b = (FixedPt<3,4,true>(6.00)*FixedPt<2,3,true>(2.0));
+   std::cout << "mult6b bits " << mult6b.to_bitstring() << std::endl;
+   std::cout << "float(mult6b): " << float(mult6b) << std::endl;
+   assert(float(mult6b) == 3.9375);
+   assert(mult6b.to_bitstring() == "011.1111");
+
    FixedPt<3,3> maxout;
    //maxout = maxout.max_val();
-   std::cout << "maxout.max_val() is: "<< std::hex << maxout.max_val() << std::endl;
+   std::cout << "maxout.max_val() is: "<< std::hex << unsigned(maxout.max_val()) << std::endl;
 
    std::cout << "aa  bits " << aa.to_bitstring()  << std::endl;
    auto two = FixedPt<a_wid, a_frac>(2);
@@ -121,7 +136,7 @@ int main(){
    std::cout << "aa bits; " << aa.to_bitstring() << std::endl;
 
    //FixedPt<17,16> zz(1.5);
-   FixedPt<17,16,true> zz(8589934591.25);
+   FixedPt<17,16,true> zz(8589934591.25); //just over max value
    std::cout << "sizeof zz: " << sizeof zz << std::endl;
    std::cout << "zz bits: " << zz.to_bitstring() << std::endl;
    std::cout << "sizeof(zz): " << sizeof(zz) << std::endl;

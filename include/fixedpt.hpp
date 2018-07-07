@@ -330,13 +330,11 @@ auto operator*(FixedPt<WWID,FWID,SIGNED> a, FixedPt<WWID,FWID,SIGNED> b)
       //make sure the sign bit is cleared in this case:
       prod2.val = prod2.val & (prod2.max_val() );
    }
-   /* //this should now be taken care of in the c'tor:
    if(SAT && (prod.val >> (WWID+2*FWID)) > 0){
       prod2.val = prod2.max_val();
-   }*/
+   }
    return prod2;
 }
-
 
 // infix * for FixedPts of differing widths
 template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
@@ -355,11 +353,44 @@ auto operator*(FixedPt<AWWID,AFWID> a, FixedPt<BWWID,BFWID> b) -> FixedPt<std::m
    auto prod  = FixedPt<max_wwid*2,max_fwid*2>
                        (larger_frac_val * (smaller_frac_val << shift_by));
    auto prod2 = FixedPt<max_wwid, max_fwid>(prod.val >> max_fwid);
+   
    if(SAT && (prod.val >> (max_wwid+2*max_fwid)) > 0) {
       prod2.val = prod2.max_val();
    }
+  
    return prod2;
 }
+
+// infix * for FixedPts of differing widths, same signedness
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID, bool SIGNED> 
+auto operator*(FixedPt<AWWID,AFWID,SIGNED> a, FixedPt<BWWID,BFWID,SIGNED> b)-> 
+                                                                 FixedPt<std::max(AWWID,BWWID), 
+                                                                         std::max(AFWID,BFWID),
+                                                                         SIGNED>
+{
+   auto larger_frac_val  = (a.fracwidth() >= b.fracwidth())? a.val : b.val;
+   auto larger_frac_wid  = (a.fracwidth() >= b.fracwidth())? a.fracwidth() : b.fracwidth();
+   auto smaller_frac_val = (a.fracwidth() <  b.fracwidth())? a.val : b.val;
+   auto smaller_frac_wid = (a.fracwidth() <  b.fracwidth())? a.fracwidth() : b.fracwidth();
+   const auto max_wwid = std::max(AWWID, BWWID);
+   const auto max_fwid = std::max(AFWID, BFWID);
+   
+   auto shift_by     = larger_frac_wid - smaller_frac_wid;
+   //This will be problematic if 2*(max_wwid+max_fwid) > 64!
+   auto prod  = FixedPt<max_wwid*2,max_fwid*2, SIGNED>
+                       (larger_frac_val * (smaller_frac_val << shift_by));
+   auto prod2 = FixedPt<max_wwid, max_fwid, SIGNED>(prod.val >> max_fwid);
+   if(SAT && (prod.val > prod2.max_val())) {
+      prod2.val = prod2.max_val();
+   }
+   if(SIGNED && ((a.val > 0 && b.val > 0) || (a.val < 0 && b.val < 0))){ 
+      //make sure the sign bit is cleared in this case:
+      prod2.val = prod2.val & (prod2.max_val() );
+   }
+  
+   return prod2;
+}
+
 
 // infix - for FixedPts of differing widths - non-commutative op
 template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID> 
