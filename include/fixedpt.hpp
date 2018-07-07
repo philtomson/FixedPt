@@ -330,7 +330,8 @@ auto operator*(FixedPt<WWID,FWID,SIGNED> a, FixedPt<WWID,FWID,SIGNED> b)
       //make sure the sign bit is cleared in this case:
       prod2.val = prod2.val & (prod2.max_val() );
    }
-   if(SAT && (prod.val >> (WWID+2*FWID)) > 0){
+   auto adjustment = SIGNED ? 1 : 0;
+   if(SAT && (prod.val >> (WWID+2*FWID-adjustment)) > 0){
       prod2.val = prod2.max_val();
    }
    return prod2;
@@ -380,8 +381,8 @@ auto operator*(FixedPt<AWWID,AFWID,SIGNED> a, FixedPt<BWWID,BFWID,SIGNED> b)->
    auto prod  = FixedPt<max_wwid*2,max_fwid*2, SIGNED>
                        (larger_frac_val * (smaller_frac_val << shift_by));
    auto prod2 = FixedPt<max_wwid, max_fwid, SIGNED>(prod.val >> max_fwid);
-
-   if(SAT && (prod.val >> (max_wwid+2*max_fwid-1)) > 0) {
+   auto adjustment = SIGNED ? 1 : 0;
+   if(SAT && (prod.val >> (max_wwid+2*max_fwid-adjustment)) > 0) {
       prod2.val = prod2.max_val();
    }
 

@@ -83,8 +83,14 @@ int main(){
    auto mult3s= (FixedPt<4,4,true>(7.0)*FixedPt<4,4,true>(2.0));
    std::cout << "mult3s bits " << mult3s.to_bitstring()  << std::endl;
    std::cout << "mult3s to float: " << float(mult3s)  << std::endl;
-   assert(float(mult3s) == 6.0);
-   assert(mult3s.to_bitstring() == "0110.0000");
+   assert(float(mult3s) == 7.9375);
+   assert(mult3s.to_bitstring() == "0111.1111");
+
+   auto mult3as= (FixedPt<5,4,true>(7.0)*FixedPt<5,4,true>(2.0));
+   std::cout << "mult3as bits " << mult3as.to_bitstring()  << std::endl;
+   std::cout << "mult3as to float: " << float(mult3as)  << std::endl;
+   assert(float(mult3as) == 14.0);
+   assert(mult3as.to_bitstring() == "01110.0000");
    
 
    auto mult4 = (FixedPt<5, 3>(1.5)*FixedPt<5,3>(1.5));
