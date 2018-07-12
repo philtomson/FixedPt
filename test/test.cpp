@@ -69,10 +69,12 @@ int main(){
    auto mult = aa*FixedPt<a_wid,a_frac>(2.0);  // should be 16.5
    std::cout << "mult  bits " << mult.to_bitstring()  << std::endl;
    assert(float(mult) == 16.5);
+   assert(int(mult)   == 16);
 
    auto mult2= (FixedPt<a_wid,a_frac>(1.25)*FixedPt<a_wid,a_frac>(2.0));
    std::cout << "mult2 bits " << mult2.to_bitstring()  << std::endl;
    assert(float(mult2) == 2.5);
+   assert(int(mult2)   == 2);
    assert(mult2.to_bitstring() == "00010.100");
 
    auto mult3= (FixedPt<a_wid,a_frac>(7.0)*FixedPt<b_wid,b_frac>(2.0));
@@ -97,6 +99,7 @@ int main(){
    std::cout << "mult4 bits " << mult4.to_bitstring() << std::endl;
    assert(float(mult4) == 2.25);
    assert(mult4.to_bitstring() == "00010.010");
+   assert(int(mult4) == 2);
 
    auto mult5 = (FixedPt<3, 3>(4.25)*FixedPt<3,3>(4.0));
    std::cout << "mult5 bits " << mult5.to_bitstring() << " (should saturate)"<< std::endl;

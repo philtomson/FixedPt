@@ -168,6 +168,7 @@ struct FixedPt {
 
       operator float()  { return this->to_f(); }
       operator double() { return this->to_double(); }
+      operator int()    { return val >> FRACWIDTH; }
 
       //default c'tor
       FixedPt() : val(0) { }
