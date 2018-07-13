@@ -93,6 +93,10 @@ struct TypeForSize_<N, Signed, std::enable_if_t< (N > 32 && N < 65 )>, std::enab
    using type = int64_t;
 };
 
+auto make_mask(int width) {
+   return ( (1 << width) - 1);
+}
+
 
 template< uint8_t WWIDTH, uint8_t FRACWIDTH, bool Signed=false>
 struct FixedPt {
@@ -166,9 +170,15 @@ struct FixedPt {
          return float(this->to_double());
       }
 
+      //get the whole part of the number as an integral type:
+      auto get_whole()  { return val_t(val >> FRACWIDTH); }
+      //get the fractional part of the number as an integral type:
+      auto get_frac()   { return (make_mask(FRACWIDTH) & val);}
       operator float()  { return this->to_f(); }
       operator double() { return this->to_double(); }
       operator int()    { return val >> FRACWIDTH; }
+      operator val_t()  { return val_t(val >> FRACWIDTH); }
+
 
       //default c'tor
       FixedPt() : val(0) { }

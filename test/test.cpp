@@ -8,7 +8,9 @@
 #include <bitset>
 #include <assert.h>
 #include <cstdint>
+#include <typeinfo>
 using namespace FPMath;
+//template <typename T> std::string type_name();
 int main(){
    constexpr uint8_t a_wid  = 5;
    constexpr uint8_t b_wid  = 4;
@@ -70,6 +72,8 @@ int main(){
    std::cout << "mult  bits " << mult.to_bitstring()  << std::endl;
    assert(float(mult) == 16.5);
    assert(int(mult)   == 16);
+   assert(int(mult)   == 16);
+   assert(uint8_t(mult) == 0x10);
 
    auto mult2= (FixedPt<a_wid,a_frac>(1.25)*FixedPt<a_wid,a_frac>(2.0));
    std::cout << "mult2 bits " << mult2.to_bitstring()  << std::endl;
@@ -144,10 +148,28 @@ int main(){
    aa = (4.4 + 1.1);
    std::cout << "aa bits; " << aa.to_bitstring() << std::endl;
 
+
+
    //FixedPt<17,16> zz(1.5);
    FixedPt<17,16,true> zz(8589934591.25); //just over max value
+   assert(int64_t(zz)    == 65535);
+   assert(int(zz)        == 65535);
+   assert(zz.get_whole() == 65535);
+   std::cout << "zz.get_frac(): " << std::hex << zz.get_frac() << std::endl;
+   assert(zz.get_frac() == 65535);
+
+   using zz_type = typename TypeForSize_<17+16,true>::type;
+   assert(zz_type(zz) == 65535);
+   //Or alternatively:
+   assert((FixedPt<17,16,true>::val_t)(zz) == 65535);
+   //yet another way to do it:['
+   assert((decltype(zz.val))(zz) == 65535);
+
+
+
    std::cout << "sizeof zz: " << sizeof zz << std::endl;
    std::cout << "zz bits: " << zz.to_bitstring() << std::endl;
+   assert(zz.to_bitstring() == "01111111111111111.1111111111111111");
    std::cout << "sizeof(zz): " << sizeof(zz) << std::endl;
    auto zzmax = zz.max_val();
    auto shift_amt = (uint64_t(1) << (17+16))-1;
