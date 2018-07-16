@@ -1,7 +1,8 @@
 /*
  * Compile with: C++17 required: (assuming you're in the test directory)
- * * clang: clang++-5.0 -I../include -o test test.cpp -std=c++1z
  * * g++: g++-7 -I../include -o test test.cpp -std=c++1z
+ * Currently does NOT compile with clang:
+ * * clang: clang++-6.0 -I../include -o test test.cpp -std=c++1z
  */
 #include <iostream>
 #include <fixedpt.hpp>
@@ -92,6 +93,7 @@ int main(){
    assert(float(mult3s) == 7.9375);
    assert(mult3s.to_bitstring() == "0111.1111");
 
+   auto testint = FixedPt<16,16,true>(132.825);
    auto mult3as= (FixedPt<5,4,true>(7.0)*FixedPt<5,4,true>(2.0));
    std::cout << "mult3as bits " << mult3as.to_bitstring()  << std::endl;
    std::cout << "mult3as to float: " << float(mult3as)  << std::endl;
@@ -174,6 +176,8 @@ int main(){
    auto zzmax = zz.max_val();
    auto shift_amt = (uint64_t(1) << (17+16))-1;
    std::cout <<  "zz.max_val() is: " << std::dec << (zzmax) << std::endl;
-   
+
+   std::cout << "sizeof(int) is: "  << sizeof(int) << std::endl;
+   std::cout << "sizeof(unsigned) is: "  << sizeof(unsigned) << std::endl;
 
 }

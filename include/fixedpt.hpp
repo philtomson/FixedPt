@@ -19,7 +19,8 @@
  *   difficult to define infix math ops on different sized FixedPts (could
  *   add a common base class so operations could be defined, but that would
  *   add overhead of virtual functions (the vptr).
- *
+ * * Does not currently compile with clang. Errors out with: 
+ *    error: multiple overloads of 'operator int' 
 
  *
  * TODO: 
@@ -137,12 +138,12 @@ struct FixedPt {
          return FRACWIDTH;
       }
 
-      val_t max_val() {
+      uint64_t max_val() {
          //constexpr const int max_val = (1<<(WWIDTH+FRACWIDTH))-1;
 
          constexpr const val_t max_val = 
-            Signed ?  (val_t(1) << (WWIDTH+FRACWIDTH-1))-1 :
-                      (val_t(1) << (WWIDTH+FRACWIDTH  ))-1;
+            Signed ?  ((uint64_t(1) << (WWIDTH+FRACWIDTH-1))-1) :
+                      ((uint64_t(1) << (WWIDTH+FRACWIDTH  ))-1);
                                                
          //std::cout << std::dec << "WWIDTH: " << unsigned(WWIDTH) << " FRACWIDTH " << unsigned(FRACWIDTH) << std::endl << std::flush; 
          /*
@@ -178,6 +179,7 @@ struct FixedPt {
       operator double() { return this->to_double(); }
       operator int()    { return val >> FRACWIDTH; }
       operator val_t()  { return val_t(val >> FRACWIDTH); }
+      
 
 
       //default c'tor
@@ -264,7 +266,12 @@ struct FixedPt {
       }
 };
 
-// infix + for FixedPts of same width and both unsigned
+// comparison op for FixedPts of same width and same sign
+template<uint8_t AWWID, uint8_t AFWID, uint8_t BWWID, uint8_t BFWID, bool SIGNED> 
+auto operator==(FixedPt<AWWID,AFWID,SIGNED> a, FixedPt<BWWID,BFWID,SIGNED> b) {
+   return a.val == b.val;
+}
+
 template<uint8_t WWID, uint8_t FWID> 
 auto operator+(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 {
@@ -332,7 +339,7 @@ auto operator*(FixedPt<WWID,FWID> a, FixedPt<WWID,FWID> b)
 }
 // infix * for FixedPts of same width and same signedness
 template<uint8_t WWID, uint8_t FWID, bool SIGNED> 
-auto operator*(FixedPt<WWID,FWID,SIGNED> a, FixedPt<WWID,FWID,SIGNED> b)
+auto operator*(FixedPt<WWID,FWID,SIGNED> a, FixedPt<WWID,FWID,SIGNED> b) //-> FixedPt<WWID,FWID,SIGNED>
 {
    //This will be problematic if 2*(WWID+FWID) > 64!
    auto prod  = FixedPt<2*WWID,2*FWID,SIGNED>(a.val * b.val);
