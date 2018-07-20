@@ -159,7 +159,6 @@ int main(){
    //FixedPt<17,16> zz(1.5);
    FixedPt<17,16,true> zz(8589934591.25); //just over max value
    assert(int64_t(zz)    == 65535);
-   assert(int(zz)        == 65535);
    assert(zz.get_whole() == 65535);
    std::cout << "zz.get_frac(): " << std::hex << zz.get_frac() << std::endl;
    assert(zz.get_frac() == 65535);

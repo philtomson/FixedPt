@@ -181,7 +181,8 @@ struct FixedPt {
       auto get_frac()   { return (make_mask(FRACWIDTH) & val);}
       operator float()  { return this->to_f(); }
       operator double() { return this->to_double(); }
-      operator int()    { return val >> FRACWIDTH; }
+      //NOTE: defining operator int() causes problems as it conflicts with int64_t
+      //operator int()    { return (val >> FRACWIDTH); }
       operator val_t()  { return val_t(val >> FRACWIDTH); }
       
 
