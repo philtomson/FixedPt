@@ -94,11 +94,15 @@ int main(){
    assert(mult3s.to_bitstring() == "0111.1111");
 
    auto testint = FixedPt<16,16,true>(132.825);
+   std::cout << "testint.val_type(): " << testint.val_type() << std::endl;
+   assert(testint.val_type() == "int32_t");
+   /*
    auto mult3as= (FixedPt<5,4,true>(7.0)*FixedPt<5,4,true>(2.0));
    std::cout << "mult3as bits " << mult3as.to_bitstring()  << std::endl;
    std::cout << "mult3as to float: " << float(mult3as)  << std::endl;
    assert(float(mult3as) == 14.0);
    assert(mult3as.to_bitstring() == "01110.0000");
+   */
    
 
    auto mult4 = (FixedPt<5, 3>(1.5)*FixedPt<5,3>(1.5));

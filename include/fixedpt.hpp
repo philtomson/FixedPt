@@ -50,48 +50,56 @@ template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 0 && N < 9)>, std::enable_if_t<!Signed>>
 {
    using type = uint8_t;
+   static std::string type_name() { return std::string("uint8_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 0 && N < 9)>, std::enable_if_t<Signed>>
 {
    using type = int8_t;
+   static std::string type_name() { return std::string("int8_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 8 && N < 17 )>, std::enable_if_t<!Signed>>
 {
    using type = uint16_t;
+   static std::string type_name() { return std::string("uint16_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 8 && N < 17 )>, std::enable_if_t<Signed>>
 {
    using type = int16_t;
+   static std::string type_name() { return std::string("int16_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 16 && N < 33 )>, std::enable_if_t<!Signed>>
 {
    using type = uint32_t;
+   static std::string type_name() { return std::string("uint32_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 16 && N < 33 )>, std::enable_if_t<Signed>>
 {
    using type = int32_t;
+   static std::string type_name() { return std::string("int32_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 32 && N < 65 )>, std::enable_if_t<!Signed>>
 {
    using type = uint64_t;
+   static std::string type_name() { return std::string("uint64_t"); }
 };
 
 template<std::size_t N, bool Signed>
 struct TypeForSize_<N, Signed, std::enable_if_t< (N > 32 && N < 65 )>, std::enable_if_t<Signed>>
 {
    using type = int64_t;
+   static std::string type_name() { return std::string("int64_t"); }
 };
 
 auto make_mask(int width) {
@@ -109,6 +117,10 @@ struct FixedPt {
          MAX_VAL = Signed? (val_t(1) << (WWIDTH+FRACWIDTH-1))-1 :
                            (val_t(1) << (WWIDTH+FRACWIDTH))-1;
       val_t val    : (WWIDTH + FRACWIDTH);
+
+      static std::string val_type() { 
+         return TypeForSize_<WWIDTH+FRACWIDTH, Signed>::type_name();
+      }
 
       template<typename FT>
       val_t float2fixed(const FT& n){
@@ -139,17 +151,9 @@ struct FixedPt {
       }
 
       uint64_t max_val() {
-         //constexpr const int max_val = (1<<(WWIDTH+FRACWIDTH))-1;
-
          constexpr const val_t max_val = 
             Signed ?  ((uint64_t(1) << (WWIDTH+FRACWIDTH-1))-1) :
                       ((uint64_t(1) << (WWIDTH+FRACWIDTH  ))-1);
-                                               
-         //std::cout << std::dec << "WWIDTH: " << unsigned(WWIDTH) << " FRACWIDTH " << unsigned(FRACWIDTH) << std::endl << std::flush; 
-         /*
-         val_t max_val = Signed?(val_t(1) << (WWIDTH+FRACWIDTH-1))-1 :
-                                (val_t(1) << (WWIDTH+FRACWIDTH))-1;
-                                */
          return (max_val);
       }
 
